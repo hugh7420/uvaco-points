@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="葡眾積分" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <title>葡眾積分換算</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+:root {
+  --gold: #b48c50;
+  --gold-light: #d4a84b;
+  --gold-dim: #7a6535;
+  --bg: #0d0d0d;
+  --card: #161616;
+  --border: #222222;
+  --text: #f5f0e8;
+  --muted: #555555;
+  --dark-muted: #444444;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: 'Noto Serif TC', serif;
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(180,140,80,0.13) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 460px;
+  padding: 0 18px 48px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: env(safe-area-inset-top, 48px) 0 36px;
+}
+
+.brand {
+  font-size: 12px;
+  letter-spacing: 6px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+h1 span { color: var(--gold); }
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+}
+
+.divider {
+  width: 36px; height: 1px;
+  background: var(--gold);
+  opacity: 0.45;
+  margin: 16px auto 0;
+}
+
+/* Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 28px 70px rgba(0,0,0,0.55);
+}
+
+.section-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Region tabs */
+.region-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 22px;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dark-muted);
+  cursor: pointer;
+  transition: all 0.22s;
+  font-family: 'Noto Serif TC', serif;
+  -webkit-appearance: none;
+}
+
+.tab.active {
+  background: #1e1a12;
+  color: var(--gold);
+  box-shadow: 0 2px 14px rgba(180,140,80,0.13);
+}
+
+.tab .flag { font-size: 22px; line-height: 1; }
+.tab .rname { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+.tab .hint { font-size: 10px; font-family: 'DM Mono', monospace; opacity: 0.55; margin-top: 2px; }
+
+/* PV input */
+.input-wrap {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.pv-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 17px 60px 17px 20px;
+  font-size: 28px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pv-input:focus { border-color: var(--gold); }
+
+.pv-unit {
+  position: absolute;
+  right: 18px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #444;
+  font-family: 'DM Mono', monospace;
+}
+
+/* Pct buttons */
+.pct-section { margin-bottom: 22px; }
+
+.pct-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.pct-btn {
+  padding: 12px 4px;
+  border: 1px solid #222;
+  border-radius: 10px;
+  background: var(--bg);
+  color: #444;
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+
+.pct-btn.active {
+  background: #1e1a12;
+  border-color: var(--gold);
+  color: var(--gold-light);
+  box-shadow: 0 0 10px rgba(180,140,80,0.13);
+}
+
+/* Result */
+.result-box {
+  background: linear-gradient(135deg, #1a1508, #12100a);
+  border: 1px solid #2d2410;
+  border-radius: 14px;
+  padding: 22px 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.result-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.35;
+}
+
+.result-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.result-value {
+  font-size: 50px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  color: var(--gold-light);
+  line-height: 1;
+  letter-spacing: -2px;
+  transition: color 0.2s;
+}
+
+.result-value.zero { color: #333; }
+
+.result-currency {
+  font-size: 13px;
+  color: var(--gold-dim);
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+
+/* Breakdown */
+.breakdown { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+
+.bd-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.bd-label { font-family: 'DM Mono', monospace; font-size: 11px; color: #444; letter-spacing: 1px; }
+.bd-val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--gold-dim); }
+.bd-val.hi { color: var(--gold); }
+
+/* Reset */
+.reset-btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px;
+  background: transparent;
+  border: 1px solid #222;
+  border-radius: 10px;
+  color: #333;
+  font-size: 11px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  font-family: 'Noto Serif TC', serif;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+
+.reset-btn:active { border-color: #444; color: #555; }
+
+footer {
+  text-align: center;
+  font-size: 11px;
+  color: #2a2a2a;
+  letter-spacing: 2px;
+  margin-top: 28px;
+}
+
+/* iOS install banner */
+.install-hint {
+  display: none;
+  margin-top: 20px;
+  background: #161616;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #555;
+  text-align: center;
+  line-height: 1.7;
+}
+
+.install-hint strong { color: var(--gold); }
+```
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="brand">葡眾國際</p>
+      <h1>積分<span>換算</span>系統</h1>
+      <p class="subtitle">INTERNATIONAL POINTS CALCULATOR</p>
+      <div class="divider"></div>
+    </header>
+
+```
+<div class="card">
+  <!-- Region -->
+  <span class="section-label">選擇地區</span>
+  <div class="region-tabs">
+    <button class="tab active" id="tab-tw" onclick="setRegion('TW')">
+      <span class="flag">🇹🇼</span>
+      <span class="rname">台灣地區</span>
+      <span class="hint">PV × 25</span>
+    </button>
+    <button class="tab" id="tab-my" onclick="setRegion('MY')">
+      <span class="flag">🇲🇾</span>
+      <span class="rname">馬來西亞</span>
+      <span class="hint">PV × 3.5</span>
+    </button>
+  </div>
+
+  <!-- PV Input -->
+  <span class="section-label">輸入 PV 值</span>
+  <div class="input-wrap" style="margin-top:0">
+    <input class="pv-input" id="pv-input" type="number" inputmode="decimal" min="0" placeholder="0" oninput="calculate()" />
+    <span class="pv-unit">PV</span>
+  </div>
+
+  <!-- Percentage -->
+  <div class="pct-section">
+    <span class="section-label">選擇百分比（可選）</span>
+    <div class="pct-grid">
+      <button class="pct-btn" onclick="togglePct(5)">5%</button>
+      <button class="pct-btn" onclick="togglePct(10)">10%</button>
+      <button class="pct-btn" onclick="togglePct(15)">15%</button>
+      <button class="pct-btn" onclick="togglePct(20)">20%</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-box">
+    <p class="result-label" id="result-label">換算結果</p>
+    <div class="result-value zero" id="result-value">—</div>
+    <p class="result-currency" id="result-currency">台灣積分</p>
+  </div>
+
+  <!-- Breakdown -->
+  <div class="breakdown" id="breakdown" style="display:none">
+    <div class="bd-row" id="bd-base">
+      <span class="bd-label" id="bd-base-label">PV × 25</span>
+      <span class="bd-val" id="bd-base-val">—</span>
+    </div>
+    <div class="bd-row" id="bd-pct" style="display:none">
+      <span class="bd-label" id="bd-pct-label">—</span>
+      <span class="bd-val hi" id="bd-pct-val">—</span>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">清除重置</button>
+</div>
+
+<div class="install-hint" id="install-hint">
+  📱 想加到主畫面？點 Safari 底部的 <strong>分享</strong> 按鈕，<br>選擇「<strong>加入主畫面</strong>」即可像 App 一樣使用！
+</div>
+
+<footer>© 葡眾國際積分換算 · 僅供參考</footer>
+```
+
+  </div>
+
+  <script>
+    let region = 'TW';
+    let selectedPct = null;
+
+    function setRegion(r) {
+      region = r;
+      document.getElementById('tab-tw').classList.toggle('active', r === 'TW');
+      document.getElementById('tab-my').classList.toggle('active', r === 'MY');
+      document.getElementById('result-currency').textContent = r === 'TW' ? '台灣積分' : '馬來西亞積分';
+      calculate();
+    }
+
+    function togglePct(p) {
+      selectedPct = (selectedPct === p) ? null : p;
+      document.querySelectorAll('.pct-btn').forEach((btn, i) => {
+        const vals = [5, 10, 15, 20];
+        btn.classList.toggle('active', vals[i] === selectedPct);
+      });
+      calculate();
+    }
+
+    function fmt(n) {
+      return n.toLocaleString('zh-TW', {
+        minimumFractionDigits: region === 'MY' ? 1 : 0,
+        maximumFractionDigits: region === 'MY' ? 1 : 0
+      });
+    }
+
+    function calculate() {
+      const pv = parseFloat(document.getElementById('pv-input').value) || 0;
+      const mult = region === 'TW' ? 25 : 3.5;
+      const base = pv * mult;
+      const pctAmt = selectedPct !== null ? base * selectedPct / 100 : null;
+      const final = pctAmt !== null ? pctAmt : base;
+      const isZero = pv === 0;
+
+      const rv = document.getElementById('result-value');
+      rv.textContent = isZero ? '—' : fmt(final);
+      rv.classList.toggle('zero', isZero);
+
+      const rl = document.getElementById('result-label');
+      rl.textContent = selectedPct !== null ? `${selectedPct}% 積分結果` : '換算結果';
+
+      // Breakdown
+      const bd = document.getElementById('breakdown');
+      bd.style.display = isZero ? 'none' : 'flex';
+
+      if (!isZero) {
+        document.getElementById('bd-base-label').textContent = `PV × ${mult}`;
+        document.getElementById('bd-base-val').textContent = `${fmt(base)} 積分`;
+
+        const bdPct = document.getElementById('bd-pct');
+        if (selectedPct !== null) {
+          bdPct.style.display = 'flex';
+          document.getElementById('bd-pct-label').textContent = `${fmt(base)} × ${selectedPct}%`;
+          document.getElementById('bd-pct-val').textContent = `${fmt(pctAmt)} 積分`;
+        } else {
+          bdPct.style.display = 'none';
+        }
+      }
+    }
+
+    function resetAll() {
+      document.getElementById('pv-input').value = '';
+      selectedPct = null;
+      document.querySelectorAll('.pct-btn').forEach(b => b.classList.remove('active'));
+      calculate();
+    }
+
+    // Show iOS install hint
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone;
+    if (isIOS && !isStandalone) {
+      document.getElementById('install-hint').style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
